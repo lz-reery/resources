@@ -1,0 +1,46 @@
+octez-node Jul 25 15:21:31.046: the node configuration has been successfully validated.                                                 
+││ octez-node Jul 25 15:21:31.046: generating an identity file                                                                             
+││ rollup-node starting rollup node                                                                                                        
+││ rollup-node Smart rollup node configuration written in /root/.tezos-smart-rollup-node/config.json                                       
+││ rollup-node Jul 25 15:21:30.300: Starting the smart rollup node                                                                         
+││ rollup-node Jul 25 15:21:30.300: [sc_rollup_node] Starting layer 1 tracker                                                              
+││ rollup-node Jul 25 15:21:30.302: [sc_rollup_node] cannot connect to Tezos node (0)                                                      
+││ rollup-node Jul 25 15:21:30.302:   Error:                                                                                               
+││ rollup-node Jul 25 15:21:30.302:     Rpc request failed:                                                                                
+││ rollup-node Jul 25 15:21:30.302:        - meth: GET                                                                                     
+││ rollup-node Jul 25 15:21:30.302:        - uri: http://localhost:8732/monitor/heads/main                                                 
+││ rollup-node Jul 25 15:21:30.302:        - error: Unable to connect to the node: "Unix.Unix_error(Unix.ECONNREFUSED, "connect", "")"     
+││ rollup-node Jul 25 15:21:30.302:                                                                                                        
+││ rollup-node Jul 25 15:21:30.303: [sc_rollup_node] Retrying to connect in 2.54055s                                                       
+││ rollup-node Jul 25 15:21:32.846: [sc_rollup_node] cannot connect to Tezos node (1)                                                      
+││ rollup-node Jul 25 15:21:32.846:   Error:                                                                                               
+││ rollup-node Jul 25 15:21:32.846:     Rpc request failed:                                                                                
+││ rollup-node Jul 25 15:21:32.846:        - meth: GET                                                                                     
+││ rollup-node Jul 25 15:21:32.846:        - uri: http://localhost:8732/monitor/heads/main                                                 
+││ rollup-node Jul 25 15:21:32.846:        - error: Unable to connect to the node: "Unix.Unix_error(Unix.ECONNREFUSED, "connect", "")"     
+││ rollup-node Jul 25 15:21:32.846:                                                                                                        
+││ rollup-node Jul 25 15:21:32.847: [sc_rollup_node] Retrying to connect in 4.30217s                                                       
+││ Stream closed EOF for etherlink/etherlink-statefulset-0 (init-rollup-node)                                                              
+││ evm-proxy -rwxr-xr-x    1 tezos    nogroup   98400528 Jul 16 21:15 /usr/local/bin/octez-evm-node                                        
+││ evm-proxy creating evm node config                                                                                                      
+││ evm-proxy Jul 25 15:21:31.275: starting the EVM node (proxy)                                                                            
+││ evm-proxy Jul 25 15:21:31.276: Cannot connect to http://localhost:8932, retrying in 1 seconds.                                          
+││ evm-proxy Jul 25 15:21:32.277: Cannot connect to http://localhost:8932, retrying in 2 seconds.                                          
+││ evm-proxy Jul 25 15:21:34.278: Cannot connect to http://localhost:8932, retrying in 4 seconds.                                          
+││ init-rollup-node Rollup node already initialized.                                                                                       
+││ init-octez-node Octez node already initialized.                                                                                         
+││ Stream closed EOF for etherlink/etherlink-statefulset-0 (init-octez-node)                                                               
+││ rollup-node Jul 25 15:21:48.684: [sc_rollup_node] cannot connect to Tezos node (4)                                                      
+││ rollup-node Jul 25 15:21:48.684:   Error:                                                                                               
+││ rollup-node Jul 25 15:21:48.684:     Rpc request failed:                                                                                
+││ rollup-node Jul 25 15:21:48.684:        - meth: GET                                                                                     
+││ rollup-node Jul 25 15:21:48.684:        - uri: http://localhost:8732/monitor/heads/main                                                 
+││ rollup-node Jul 25 15:21:48.684:        - error: Unable to connect to the node: "Unix.Unix_error(Unix.ECONNREFUSED, "connect", "")"     
+││ rollup-node Jul 25 15:21:48.684:                                                                                                        
+││ rollup-node Jul 25 15:21:48.684: [sc_rollup_node] Retrying to connect in 5.53645s
+│| starting rollup node                                                                                                                    
+││ Smart rollup node configuration written in /root/.tezos-smart-rollup-node/config.json                                                   
+││ Jul 25 15:23:48.227: Starting the smart rollup node                                                                                     
+││ Jul 25 15:23:48.228: [sc_rollup_node] Starting layer 1 tracker                                                                          
+││ Error:                                                                                                                                  
+││   Protocol Ps9mPmXaRzmzk35gbAYNCAw6UXdE2qoABTHbN2oEEc1qM7CwT9P is not supported by the rollup node.
