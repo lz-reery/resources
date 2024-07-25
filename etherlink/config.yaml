@@ -101,7 +101,6 @@ containers:
     args:
       - >
         set -e;
-        ls -l /usr/local/bin/octez-evm-node;
         chmod +x /usr/local/bin/octez-evm-node;
         export PATH=$PATH:/usr/local/bin;
         echo "creating evm node config";
