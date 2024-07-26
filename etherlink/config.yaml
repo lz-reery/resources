@@ -8,12 +8,12 @@ initContainers:
     command: ["sh", "-c"]
     args:
       - >
-        su tezos;
         set -e;
         if [ ! -e "/home/tezos/.initialized" ]; then
           mkdir -p /home/tezos;
+          mkdir -p /home/tezos/octez-node;
           if [[ -n mainnet ]]; then
-            /usr/local/bin/octez-node config init --network "mainnet";
+            /usr/local/bin/octez-node config init --data-dir=/home/tezos/octez-node --network "mainnet" ;
           fi;
           if [[ -n https://snapshots.eu.tzinit.org/mainnet/rolling ]]; then
             if [ ! -e "/home/tezos/snapshot" ]; then
@@ -22,7 +22,7 @@ initContainers:
               echo "Snapshot /home/tezos/snapshot already exists, using it.";
             fi;
             echo "importing snapshot /home/tezos/snapshot";
-            /usr/local/bin/octez-node snapshot import /home/tezos/snapshot;
+            /usr/local/bin/octez-node snapshot import /home/tezos/snapshot --data-dir=/home/tezos/octez-node --no-check;
           fi;
           touch /home/tezos/.initialized;
         else
@@ -38,22 +38,23 @@ initContainers:
     command: ["sh", "-c"]
     args:
       - >
-        su tezos;
         set -e;
         if [ ! -e "/home/tezos/.rollup_initialized" ]; then
+          mkdir -p /home/tezos;
+          mkdir -p /home/tezos/rollup-node;
           echo "creating rollup node config";
           /usr/local/bin/octez-smart-rollup-node init observer config for sr1Ghq66tYK9y3r8CC1Tf8i8m5nxh8nTvZEf \
             with operators --rpc-addr 0.0.0.0 --rpc-port 8932 --cors-origins '*' \
             --cors-headers '*' --pre-images-endpoint https://snapshots.eu.tzinit.org/etherlink-mainnet/wasm_2_0_0 \
-            --acl-override allow-all;
-          if [[ -n https://snapshots.eu.tzinit.org/etherlink-mainnet/eth-mainnet.full ]]; then
+            --acl-override allow-all --data-dir /home/tezos/rollup-node;
+          if [ -n "https://snapshots.eu.tzinit.org/etherlink-mainnet/eth-mainnet.full" ]; then
             if [ ! -e "/home/tezos/rollup-snapshot" ]; then
               wget -O "/home/tezos/rollup-snapshot" https://snapshots.eu.tzinit.org/etherlink-mainnet/eth-mainnet.full;
             else
               echo "Snapshot /home/tezos/rollup-snapshot already exists, using it.";
             fi;
             echo "importing snapshot /home/tezos/rollup-snapshot";
-            /usr/local/bin/octez-smart-rollup-node --endpoint https://rpc.tzkt.io/mainnet snapshot import /home/tezos/rollup-snapshot;
+            /usr/local/bin/octez-smart-rollup-node --endpoint https://rpc.tzkt.io/mainnet snapshot import /home/tezos/rollup-snapshot --data-dir /home/tezos/rollup-node;
           fi;
           touch /home/tezos/.rollup_initialized;
         else
@@ -65,7 +66,6 @@ initContainers:
     securityContext:
       runAsUser: 0
 
-
 containers:
   - name: octez-node
     image: tezos/tezos-bare:octez-v20.2
@@ -75,9 +75,8 @@ containers:
     command: ["sh", "-c"]
     args:
       - >
-        su tezos;
         set -e;
-        /usr/local/bin/octez-node run --rpc-addr=0.0.0.0:8732 --allow-all-rpc 0.0.0.0
+        /usr/local/bin/octez-node run --data-dir=/home/tezos/octez-node --rpc-addr=0.0.0.0:8732 --allow-all-rpc 0.0.0.0
     ports:
       - containerPort: 8732
         name: http-node
@@ -91,11 +90,10 @@ containers:
     command: ["sh", "-c"]
     args: 
       - >
-        su tezos;
         set -e;
         export PATH=$PATH:/usr/local/bin;
         echo "starting rollup node";
-        /usr/local/bin/octez-smart-rollup-node --endpoint http://localhost:8732 run;
+        /usr/local/bin/octez-smart-rollup-node --endpoint https://rpc.tzkt.io/mainnet run --data-dir /home/tezos/rollup-node;
     # above I'm re-initing the sr node because it seems like the init container didn't leave the correct file behind?
         # /usr/local/bin/octez-smart-rollup-node init observer config for sr1Ghq66tYK9y3r8CC1Tf8i8m5nxh8nTvZEf with operators --rpc-addr 0.0.0.0 --rpc-port 8932 --cors-origins '*' --cors-headers '*' --pre-images-endpoint https://snapshots.eu.tzinit.org/etherlink-mainnet/wasm_2_0_0 --acl-override allow-all; 
     ports:
@@ -111,7 +109,7 @@ containers:
     command: ["sh", "-c"]
     args:
       - >
-        su tezos
+        su tezos;
         set -e;
         ls -l /usr/local/bin/octez-evm-node;
         chmod +x /usr/local/bin/octez-evm-node;
