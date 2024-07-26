@@ -1,9 +1,14 @@
 initContainers:
   - name: init-octez-node
     image: tezos/tezos-bare:octez-v20.2
+    resources:
+      requests:
+        memory: "32Gi"
+        cpu: "8"
     command: ["sh", "-c"]
     args:
       - >
+        su tezos;
         set -e;
         if [ ! -e "/home/tezos/.initialized" ]; then
           mkdir -p /home/tezos;
@@ -33,6 +38,7 @@ initContainers:
     command: ["sh", "-c"]
     args:
       - >
+        su tezos;
         set -e;
         if [ ! -e "/home/tezos/.rollup_initialized" ]; then
           echo "creating rollup node config";
@@ -66,8 +72,12 @@ containers:
     volumeMounts:
       - name: etherlink-pvc
         mountPath: /home/tezos
-    command: ["/usr/local/bin/octez-node"]
-    args: ["run", "--rpc-addr=0.0.0.0:8732", "--allow-all-rpc", "0.0.0.0"]
+    command: ["sh", "-c"]
+    args:
+      - >
+        su tezos;
+        set -e;
+        /usr/local/bin/octez-node run --rpc-addr=0.0.0.0:8732 --allow-all-rpc 0.0.0.0
     ports:
       - containerPort: 8732
         name: http-node
@@ -81,12 +91,13 @@ containers:
     command: ["sh", "-c"]
     args: 
       - >
+        su tezos;
         set -e;
         export PATH=$PATH:/usr/local/bin;
         echo "starting rollup node";
-        /usr/local/bin/octez-smart-rollup-node init observer config for sr1Ghq66tYK9y3r8CC1Tf8i8m5nxh8nTvZEf with operators --rpc-addr 0.0.0.0 --rpc-port 8932 --cors-origins '*' --cors-headers '*' --pre-images-endpoint https://snapshots.eu.tzinit.org/etherlink-mainnet/wasm_2_0_0 --acl-override allow-all; 
         /usr/local/bin/octez-smart-rollup-node --endpoint http://localhost:8732 run;
     # above I'm re-initing the sr node because it seems like the init container didn't leave the correct file behind?
+        # /usr/local/bin/octez-smart-rollup-node init observer config for sr1Ghq66tYK9y3r8CC1Tf8i8m5nxh8nTvZEf with operators --rpc-addr 0.0.0.0 --rpc-port 8932 --cors-origins '*' --cors-headers '*' --pre-images-endpoint https://snapshots.eu.tzinit.org/etherlink-mainnet/wasm_2_0_0 --acl-override allow-all; 
     ports:
       - containerPort: 8932
         name: http-rollup
@@ -100,7 +111,9 @@ containers:
     command: ["sh", "-c"]
     args:
       - >
+        su tezos
         set -e;
+        ls -l /usr/local/bin/octez-evm-node;
         chmod +x /usr/local/bin/octez-evm-node;
         export PATH=$PATH:/usr/local/bin;
         echo "creating evm node config";
