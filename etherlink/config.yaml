@@ -29,7 +29,7 @@ initContainers:
     securityContext:
       runAsUser: 0
   - name: init-rollup-node
-    image: tezos/tezos-bare:master_3f7d4e39_20240716203446
+    image: tezos/tezos-bare:octez-v20.2
     command: ["sh", "-c"]
     args:
       - >
@@ -74,7 +74,7 @@ containers:
     securityContext:
       runAsUser: 0
   - name: rollup-node
-    image: tezos/tezos-bare:master_3f7d4e39_20240716203446
+    image: tezos/tezos-bare:octez-v20.2
     volumeMounts:
       - name: etherlink-pvc
         mountPath: /home/tezos
@@ -93,7 +93,7 @@ containers:
     securityContext:
       runAsUser: 0
   - name: evm-proxy
-    image: tezos/tezos-bare:master_3f7d4e39_20240716203446
+    image: us-central1-docker.pkg.dev/nl-gitlab-runner/protected-registry/tezos/tezos/bare:master_d1b1350d_20240819143046
     volumeMounts:
       - name: etherlink-pvc
         mountPath: /home/tezos
@@ -105,7 +105,7 @@ containers:
         export PATH=$PATH:/usr/local/bin;
         echo "creating evm node config";
         /usr/local/bin/octez-evm-node init config --rollup-node-endpoint http://localhost:8932 --cors-origins '*' --cors-headers '*' --rpc-addr 0.0.0.0 --rpc-port 8545 --keep-alive;
-        /usr/local/bin/octez-evm-node run proxy --finalized-view --read-only --keep-alive
+        /usr/local/bin/octez-evm-node run proxy --finalized-view --ignore-block-param --keep-alive --evm-node-endpoint https://relay.mainnet.etherlink.com
     ports:
       - containerPort: 8545
         name: http-evm
