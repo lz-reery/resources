@@ -1,6 +1,6 @@
 initContainers:
   - name: init-octez-node
-    image: tezos/tezos-bare:octez-v20.2
+    image: tezos/tezos-bare:octez-v21.0-rc2
     resources:
       requests:
         memory: "32Gi"
@@ -34,7 +34,7 @@ initContainers:
     securityContext:
       runAsUser: 0
   - name: init-rollup-node
-    image: tezos/tezos-bare:octez-v20.2
+    image: tezos/tezos-bare:octez-v21.0-rc2
     command: ["sh", "-c"]
     args:
       - >
@@ -59,6 +59,36 @@ initContainers:
           touch /home/tezos/.rollup_initialized;
         else
           echo "Rollup node already initialized.";
+        fi
+    volumeMounts:
+      - name: etherlink-pvc
+        mountPath: /home/tezos
+    securityContext:
+      runAsUser: 0
+  - name: init-evm-node
+    image: tezos/tezos-bare:octez-evm-node-v0.7
+    command: ["sh", "-c"]
+    args:
+      - >
+        set -e;
+        if [ ! -e "/home/tezos/.evm_initialized" ]; then
+          mkdir -p /home/tezos;
+          mkdir -p /home/tezos/evm-node;
+          echo "creating EVM node config";
+        /usr/local/bin/octez-evm-node init config --rollup-node-endpoint http://localhost:8932 --cors-origins '*' --cors-headers '*' --rpc-addr 0.0.0.0 --rpc-port 8545 --keep-alive --data-dir /home/tezos/evm-node;
+          if [ -n "http://vps-58f6d7fc.vps.ovh.net/snapshots/evm-snapshot-sr1Ghq66tYK9y-latest.gz" ]; then
+            if [ ! -e "/home/tezos/evm-snapshot" ]; then
+              wget -O "/home/tezos/evm-snapshot" http://vps-58f6d7fc.vps.ovh.net/snapshots/evm-snapshot-sr1Ghq66tYK9y-latest.gz
+;
+            else
+              echo "Snapshot /home/tezos/evm-snapshot already exists, using it.";
+            fi;
+            echo "importing snapshot /home/tezos/evm-snapshot";
+            /usr/local/bin/octez-evm-node snapshot import /home/tezos/evm-snapshot --data-dir /home/tezos/evm-node;
+          fi;
+          touch /home/tezos/.evm_initialized;
+        else
+          echo "EVM node already initialized.";
         fi
     volumeMounts:
       - name: etherlink-pvc
@@ -99,8 +129,8 @@ containers:
         name: http-rollup
     securityContext:
       runAsUser: 0
-  - name: evm-proxy
-    image: us-central1-docker.pkg.dev/nl-gitlab-runner/protected-registry/tezos/tezos/bare:master_d1b1350d_20240819143046
+  - name: evm-observer
+    image: tezos/tezos-bare:octez-evm-node-v0.7
     volumeMounts:
       - name: etherlink-pvc
         mountPath: /home/tezos
@@ -113,9 +143,8 @@ containers:
         chmod +x /usr/local/bin/octez-evm-node;
         export PATH=$PATH:/usr/local/bin;
         echo "creating evm node config";
-        /usr/local/bin/octez-evm-node init config --rollup-node-endpoint http://localhost:8932 --cors-origins '*' --cors-headers '*' --rpc-addr 0.0.0.0 --rpc-port 8545 --keep-alive;
-        /usr/local/bin/octez-evm-node run proxy --finalized-view --ignore-block-param --keep-alive --evm-node-endpoint https://relay.mainnet.etherlink.com
-    ports:
+        /usr/local/bin/octez-evm-node run observer --finalized-view --evm-node-endpoint https://relay.mainnet.etherlink.com --data-dir=/home/tezos/evm-node;
+    ports :
       - containerPort: 8545
         name: http-evm
     securityContext:
