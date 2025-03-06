@@ -1,6 +1,7 @@
+
 initContainers:
   - name: init-octez-node
-    image: tezos/tezos-bare:octez-v21.0-rc2
+    image: tezos/tezos-bare:octez-v21.3
     resources:
       requests:
         memory: "32Gi"
@@ -8,12 +9,12 @@ initContainers:
     command: ["sh", "-c"]
     args:
       - >
-        set -e;
-        if [ ! -e "/home/tezos/.initialized" ]; then
+        set -e; if [ ! -e "/home/tezos/.initialized" ]; then
+          rm -rf /home/tezos/octez-node/config.json;
           mkdir -p /home/tezos;
           mkdir -p /home/tezos/octez-node;
           if [[ -n mainnet ]]; then
-            /usr/local/bin/octez-node config init --data-dir=/home/tezos/octez-node --network "mainnet" ;
+            /usr/local/bin/octez-node config init --data-dir=/home/tezos/octez-node --network "mainnet";
           fi;
           if [[ -n https://snapshots.eu.tzinit.org/mainnet/rolling ]]; then
             if [ ! -e "/home/tezos/snapshot" ]; then
@@ -34,24 +35,21 @@ initContainers:
     securityContext:
       runAsUser: 0
   - name: init-rollup-node
-    image: tezos/tezos-bare:octez-v21.0-rc2
+    image: tezos/tezos-bare:octez-v21.3
     command: ["sh", "-c"]
     args:
       - >
-        set -e;
-        if [ ! -e "/home/tezos/.rollup_initialized" ]; then
+        set -e; if [ ! -e "/home/tezos/.rollup_initialized" ]; then
           mkdir -p /home/tezos;
           mkdir -p /home/tezos/rollup-node;
           echo "creating rollup node config";
-          /usr/local/bin/octez-smart-rollup-node init observer config for sr1Ghq66tYK9y3r8CC1Tf8i8m5nxh8nTvZEf \
-            with operators --rpc-addr 0.0.0.0 --rpc-port 8932 --cors-origins '*' \
-            --cors-headers '*' --pre-images-endpoint https://snapshots.eu.tzinit.org/etherlink-mainnet/wasm_2_0_0 \
-            --acl-override allow-all --data-dir /home/tezos/rollup-node;
-          if [ -n "https://snapshots.eu.tzinit.org/etherlink-mainnet/eth-mainnet.full" ]; then
+          /usr/local/bin/octez-smart-rollup-node init observer config for sr1Ghq66tYK9y3r8CC1Tf8i8m5nxh8nTvZEf with operators --rpc-addr 0.0.0.0 --rpc-port 8932 --cors-origins '*' --cors-headers '*' --pre-images-endpoint https://snapshots.eu.tzinit.org/etherlink-mainnet/wasm_2_0_0 --acl-override allow-all --data-dir /home/tezos/rollup-node;
+          if [ -n "https://snapshots.eu.tzinit.org/etherlink-mainnet/eth-mainnet.full"]; then
             if [ ! -e "/home/tezos/rollup-snapshot" ]; then
               wget -O "/home/tezos/rollup-snapshot" https://snapshots.eu.tzinit.org/etherlink-mainnet/eth-mainnet.full;
             else
-              echo "Snapshot /home/tezos/rollup-snapshot already exists, using it.";
+              echo "Snapshot /home/tezos/rollup-snapshot already exists,
+        using it.";
             fi;
             echo "importing snapshot /home/tezos/rollup-snapshot";
             /usr/local/bin/octez-smart-rollup-node --endpoint https://rpc.tzkt.io/mainnet snapshot import /home/tezos/rollup-snapshot --data-dir /home/tezos/rollup-node;
@@ -66,22 +64,23 @@ initContainers:
     securityContext:
       runAsUser: 0
   - name: init-evm-node
-    image: tezos/tezos-bare:octez-evm-node-v0.7
+    image: tezos/tezos-bare:octez-evm-node-v0.18
     command: ["sh", "-c"]
     args:
       - >
-        set -e;
-        if [ ! -e "/home/tezos/.evm_initialized" ]; then
+        set -e; if [ ! -e "/home/tezos/.evm_initialized" ]; then
           mkdir -p /home/tezos;
           mkdir -p /home/tezos/evm-node;
           echo "creating EVM node config";
-        /usr/local/bin/octez-evm-node init config --rollup-node-endpoint http://localhost:8932 --cors-origins '*' --cors-headers '*' --rpc-addr 0.0.0.0 --rpc-port 8545 --keep-alive --data-dir /home/tezos/evm-node;
-          if [ -n "http://vps-58f6d7fc.vps.ovh.net/snapshots/evm-snapshot-sr1Ghq66tYK9y-latest.gz" ]; then
+
+          if [ -n
+        "https://storage.googleapis.com/nl-sandboxes-etherlink--snapshots/etherlink-mainnet/archive/etherlink-mainnet-archive-7127155.gz"
+        ]; then
             if [ ! -e "/home/tezos/evm-snapshot" ]; then
-              wget -O "/home/tezos/evm-snapshot" http://vps-58f6d7fc.vps.ovh.net/snapshots/evm-snapshot-sr1Ghq66tYK9y-latest.gz
-;
+              wget -O "/home/tezos/evm-snapshot" https://storage.googleapis.com/nl-sandboxes-etherlink--snapshots/etherlink-mainnet/archive/etherlink-mainnet-archive-7127155.gz;
             else
-              echo "Snapshot /home/tezos/evm-snapshot already exists, using it.";
+              echo "Snapshot /home/tezos/evm-snapshot already exists,
+        using it.";
             fi;
             echo "importing snapshot /home/tezos/evm-snapshot";
             /usr/local/bin/octez-evm-node snapshot import /home/tezos/evm-snapshot --data-dir /home/tezos/evm-node;
@@ -95,10 +94,9 @@ initContainers:
         mountPath: /home/tezos
     securityContext:
       runAsUser: 0
-
 containers:
   - name: octez-node
-    image: tezos/tezos-bare:octez-v20.2
+    image: tezos/tezos-bare:octez-v21.3
     volumeMounts:
       - name: etherlink-pvc
         mountPath: /home/tezos
@@ -112,13 +110,20 @@ containers:
         name: http-node
     securityContext:
       runAsUser: 0
+    resources:
+      requests:
+        cpu: "160m"
+        memory: "8Gi"
+      limits:
+        cpu: "300m"
+        memory: "14Gi"
   - name: rollup-node
-    image: tezos/tezos-bare:octez-v20.2
+    image: tezos/tezos-bare:octez-v21.3
     volumeMounts:
       - name: etherlink-pvc
         mountPath: /home/tezos
     command: ["sh", "-c"]
-    args: 
+    args:
       - >
         set -e;
         export PATH=$PATH:/usr/local/bin;
@@ -129,8 +134,15 @@ containers:
         name: http-rollup
     securityContext:
       runAsUser: 0
+    resources:
+      requests:
+        cpu: "600m"
+        memory: "16Gi"
+      limits:
+        cpu: "1000m"
+        memory: "25Gi"
   - name: evm-observer
-    image: tezos/tezos-bare:octez-evm-node-v0.7
+    image: tezos/tezos-bare:octez-evm-node-v0.18
     volumeMounts:
       - name: etherlink-pvc
         mountPath: /home/tezos
@@ -143,9 +155,5 @@ containers:
         chmod +x /usr/local/bin/octez-evm-node;
         export PATH=$PATH:/usr/local/bin;
         echo "creating evm node config";
-        /usr/local/bin/octez-evm-node run observer --finalized-view --evm-node-endpoint https://relay.mainnet.etherlink.com --data-dir=/home/tezos/evm-node;
-    ports :
-      - containerPort: 8545
-        name: http-evm
-    securityContext:
-      runAsUser: 0
+        /usr/local/bin/octez-evm-node init config --rollup-node-endpoint http://localhost:8932 --cors-origins '*' --cors-headers '*' --rpc-addr 0.0.0.0 --rpc-port 8545 --keep-alive --force --data-dir /home/tezos/evm-node;
+        /usr/local/bin/octez-evm-node run observer --finalized-view --evm-node-endpoint https://relay.mainnet.etherlink.com --data-dir /home/tezos/evm-node --preimages-endpoint https://snapshots.eu.tzinit.org/etherlink-mainnet/wasm_2_0_0 --tx-pool-tx-per-addr-limit 2048;

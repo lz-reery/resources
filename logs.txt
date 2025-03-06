@@ -1,0 +1,6 @@
+-rwxr-xr-x    1 tezos    nogroup  109648088 Feb 26 10:49 /usr/local/bin/octez-evm-node
+creating evm node config
+Mar 06 14:41:56.874: starting the EVM node (observer)
+Mar 06 14:41:57.196: running with history mode archive
+Error:
+  Cannot compute the initial EVM state without the path to the initial kernel
