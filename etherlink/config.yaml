@@ -141,3 +141,19 @@ containers:
       limits:
         cpu: "1000m"
         memory: "25Gi"
+  - name: evm-observer
+    image: tezos/tezos-bare:octez-evm-node-v0.18
+    volumeMounts:
+      - name: etherlink-pvc
+        mountPath: /home/tezos
+    command: ["sh", "-c"]
+    args:
+      - >
+        su tezos;
+        set -e;
+        ls -l /usr/local/bin/octez-evm-node;
+        chmod +x /usr/local/bin/octez-evm-node;
+        export PATH=$PATH:/usr/local/bin;
+        echo "creating evm node config";
+        /usr/local/bin/octez-evm-node init config --rollup-node-endpoint http://localhost:8932 --cors-origins '*' --cors-headers '*' --rpc-addr 0.0.0.0 --rpc-port 8545 --keep-alive --force --data-dir /home/tezos/evm-node;
+        /usr/local/bin/octez-evm-node run observer --finalized-view --evm-node-endpoint https://relay.mainnet.etherlink.com --data-dir /home/tezos/evm-node --preimages-endpoint https://snapshots.eu.tzinit.org/etherlink-mainnet/wasm_2_0_0 --tx-pool-tx-per-addr-limit 2048;
